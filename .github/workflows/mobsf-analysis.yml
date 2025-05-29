@@ -1,0 +1,43 @@
+name: MobSF APK Analysis
+
+on:
+  push:
+    paths:
+      - '*.apk'
+  workflow_dispatch:
+
+jobs:
+  analyze-apk:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Pull and Start MobSF
+        run: |
+          docker pull opensecurity/mobile-security-framework-mobsf:latest
+          docker run -d -p 8000:8000 --:latest
+          echo "MobSF đang khởi động, đợi 90 giây..."
+          sleep 90
+
+      - name: Lấy MobSF API Key
+        id: get_key
+        run: |
+          curl -X GET http://localhost:8000/api/v1/apikey/ > mobsfd '"')
+          json_resp=$(curl -F "file=@$apk_file" -H "Authorization: $api_key" http://localhost:8000/api/v1/upload/)
+          scan_hash=$(echo $json_resp | grep -o '"hash":"[^"]*' | cut -d':' -f2 | trhash\": \"$scan_hash\"}" \
+            http://localhost:8000/api/v1/report_json/ > mobsf_result.json
+
+      - name: Upload MobSF Report
+        uses: actions/upload-artifact@v3
+        with:
+          name: mobsf-report
+          path: mobsf_result.json
+`` & Push
+
+Lưu file, commit lên GitHub.  
+Sau đó, mỗi lần bạn push file `.apk` vào repo hoặc chạy workflow thủ công, MobSF sẽ tự động quét và trả kết quả báo cáo tại mục "Artifacts" trên GitHub Actions.
+
+---
+
+**Nếu có lỗi, chỉ cần gửi log lỗi, mình sẽ hỗ trợ bạn xử lý trực tiếp!**
